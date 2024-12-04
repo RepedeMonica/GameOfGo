@@ -15,6 +15,9 @@ class GameOfGo:
         self.CELL_DIMENSION = self.TABLE_DIMENSION // (self.board_size - 1)
         self.turn = "black"
         self.table = [["None" for _ in range(self.board_size)] for _ in range(self.board_size)]
+        self.previous_states = []
+        self.black_score = 0
+        self.white_score = 0
 
         self.root.geometry(f"{self.CANVAS_DIMENSION}x{self.CANVAS_DIMENSION}")
         self.root.title(f"Game of Go - {self.board_size}x{self.board_size}")
@@ -79,23 +82,98 @@ class GameOfGo:
         col = round((x - self.offset_x) / self.CELL_DIMENSION)
         row = round((y - self.offset_y) / self.CELL_DIMENSION)
 
-        cx = self.offset_x + col * self.CELL_DIMENSION
-        cy = self.offset_y + row * self.CELL_DIMENSION
-
-        radius = self.CELL_DIMENSION // 3
-
         if 0 <= col < self.board_size and 0 <= row < self.board_size:
             if self.table[row][col] == "None":
-                self.table[row][col] = self.turn
-                if self.turn == "black":
-                    self.canvas.create_oval(cx - radius, cy - radius, cx + radius, cy + radius, fill="black")
-                    self.turn = "white"
-                else:
-                    self.canvas.create_oval(cx - radius, cy - radius, cx + radius, cy + radius, fill="white")
-                    self.turn = "black"
-                self.check_adjacent()
+                #not implemented yet: check if it was a previous state -> ko
+                #not implemented yet: check suicide
 
-    def check_adjacent(self):
+                self.table[row][col] = self.turn
+
+                self.check_captures()
+                self.check_ko()
+                self.draw_piece(row, col)
+
+    def draw_piece(self, row, col):
+        """Draw the piece on the desired position"""
+        cx = self.offset_x + col * self.CELL_DIMENSION
+        cy = self.offset_y + row * self.CELL_DIMENSION
+        radius = self.CELL_DIMENSION // 3
+        self.canvas.create_oval(cx - radius, cy - radius, cx + radius, cy + radius, fill=self.turn)
+        self.turn = "black" if self.turn == "white" else "white"
+
+    def check_captures(self):
+        """Check if exists a group to be captured"""
+        opponent = "black" if self.turn == "white" else "white"
+
+        for row in range(0, self.board_size):
+            for col in range(0, self.board_size):
+                if self.table[row][col] == opponent:
+                    group = self.find_group(row, col)
+                    if not self.has_liberties(group):
+                        self.capture(group)
+
+    def has_liberties(self, group):
+        """Check if a group has liberties"""
+        for row, col in group:
+            for r, c in [(-1,0),(1,0),(0,-1),(0,1)]:
+                pos_x =row + r
+                pos_y =col + c
+                if (0 <= pos_x < self.board_size
+                        and 0 <= pos_y < self.board_size):
+                    if self.table[pos_x][pos_y] == "None":
+                        return True
+        return False
+
+    def find_group(self, row, col):
+        """Find the group of a piece"""
+        color = self.table[row][col]
+        possible_group_elements = [(row, col)]
+        group = set()
+
+        while possible_group_elements:
+            current_row, current_col = possible_group_elements.pop()
+            if (current_row, current_col) not in group:
+                group.add((current_row, current_col))
+
+                for r, c in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                    pos_x = current_row + r
+                    pos_y = current_col + c
+                    if (0 <= pos_x < self.board_size
+                            and 0 <= pos_y < self.board_size):
+                        if (self.table[pos_x][pos_y] == color
+                                and (pos_x, pos_y) not in group):
+                            possible_group_elements.append((pos_x, pos_y))
+        return group
+
+    def capture(self, group):
+        """Delete the captured group from the board"""
+        for row, col in group:
+            self.table[row][col] = "None"
+
+            x_pos = self.offset_x + col * self.CELL_DIMENSION
+            y_pos = self.offset_y + row * self.CELL_DIMENSION
+            radius = self.CELL_DIMENSION // 3
+
+            self.canvas.create_oval(
+                x_pos - radius, y_pos - radius,
+                x_pos + radius, y_pos + radius,
+                fill="tan", outline="tan")
+            self.canvas.create_line(
+                x_pos , y_pos - radius,
+                x_pos , y_pos + radius + 1)
+            self.canvas.create_line(
+                x_pos - radius, y_pos,
+                x_pos + radius + 1, y_pos )
+
+            if self.turn == "black":
+                self.black_score += 1
+            else:
+                self.white_score += 1
+
+    def check_ko(self):
         """Not implemented yet"""
-        print(self.table)
-        print()
+        pass
+
+    def check_suicide(self):
+        """Not implemented yet"""
+        pass
