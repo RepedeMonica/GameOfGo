@@ -85,13 +85,13 @@ class GameOfGo:
         if 0 <= col < self.board_size and 0 <= row < self.board_size:
             if self.table[row][col] == "None":
                 #not implemented yet: check if it was a previous state -> ko
-                #not implemented yet: check suicide
-
-                self.table[row][col] = self.turn
-
-                self.check_captures()
-                self.check_ko()
-                self.draw_piece(row, col)
+                if not self.check_suicide(row, col):
+                    self.table[row][col] = self.turn
+                    self.check_captures()
+                    self.check_ko()
+                    self.draw_piece(row, col)
+                else:
+                    print(f"{self.turn.capitalize()} made a suicidal move! Please choose another one!")
 
     def draw_piece(self, row, col):
         """Draw the piece on the desired position"""
@@ -174,6 +174,29 @@ class GameOfGo:
         """Not implemented yet"""
         pass
 
-    def check_suicide(self):
-        """Not implemented yet"""
-        pass
+    def check_suicide(self, row, col):
+        """
+        Check for suicidal move
+        Meaning check if the group resulted has liberties or captures
+        """
+        self.table[row][col] = self.turn
+        group = self.find_group(row, col)
+
+        if self.has_liberties(group):
+            self.table[row][col] = "None"
+            return False
+
+        for r, c in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            pos_x = row + r
+            pos_y = col + c
+            if (0 <= pos_x < self.board_size and
+                    0 <= pos_y < self.board_size):
+                found_group = self.find_group(pos_x, pos_y)
+                if not self.has_liberties(found_group):
+                    self.table[row][col] = "None"
+                    return False
+
+        self.table[row][col] = "None"
+        return True
+
+
