@@ -3,8 +3,10 @@
 import tkinter as tk
 import random
 
+
 class GameOfGo:
     """Class to initialize and handle Game of Go"""
+
     def __init__(self, root, computer, board_size):
         """Initialize the components for the game"""
         self.root = root
@@ -247,7 +249,7 @@ class GameOfGo:
 
         if self.has_liberties(group):
             self.table[row][col] = "None"
-            #print("Has liberties")
+            # print("Has liberties")
             return False
 
         self.table[row][col] = self.turn
@@ -279,7 +281,7 @@ class GameOfGo:
 
                 elif (row, col) not in visited:
                     group_size, color = self.find_territory_color(row, col, visited)
-                    print(f"Group size: {group_size}, color: {color}")
+                    # print(f"Group size: {group_size}, color: {color}")
                     if color == "black":
                         self.black_score += group_size
                     elif color == "white":

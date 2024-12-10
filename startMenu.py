@@ -2,6 +2,7 @@
 
 import tkinter as tk
 
+
 def choose_board_size(computer=False):
     """Display the start menu in which the user chooses the board size"""
     def submitted():
@@ -25,7 +26,7 @@ def choose_board_size(computer=False):
 
     indications = tk.Label(
         frame, text="Please choose the size of the board:",
-        font=("Chiller",48), bg=COLOR)
+        font=("Chiller", 48), bg=COLOR)
     indications.pack()
 
     second_frame = tk.Frame(frame, bg=COLOR)
@@ -33,11 +34,11 @@ def choose_board_size(computer=False):
 
     possible_dimensions = tk.Spinbox(
         second_frame, values=["9", "13", "17", "19"],
-        font=("Chiller",38), width=3, bg=COLOR)
+        font=("Chiller", 38), width=3, bg=COLOR)
     possible_dimensions.pack(side=tk.LEFT, padx=5)
 
     button = tk.Button(
-        second_frame, text="Submit", font=("Chiller",30),
+        second_frame, text="Submit", font=("Chiller", 30),
         command=submitted, bg=COLOR)
     button.pack(side=tk.RIGHT)
 
